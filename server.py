@@ -1,16 +1,35 @@
 import socket
+import threading
 
-HOST = '' # listen on all available network interfaces
-PORT = 8000 # the same port as in the ESP32 code
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.bind((HOST, PORT))
-    s.listen()
-    print('Server is listening on port', PORT)
-    
+def handle_client(sock, data, address):
+    switcher = {
+        "A": "function_A",
+        "B": "function_B"
+    }
+
+    mensage = data.decode()
+    print(f"Received '{mensage}' from {address}")
+
+    if (mensage in switcher.keys()):
+        print(f"Execute the function '{switcher[mensage]}'")
+
+
+def start_server():
+    # set up UDP socket
+    server_address = ('', 5005)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(server_address)
+
+    print("Server started.")
+
+    # handle incoming messages in separate threads
     while True:
-        conn, addr = s.accept()
-        with conn:
-            print('Connected by', addr)
-            data = conn.recv(1024)
-            print('Received:', data.decode())
+        data, address = sock.recvfrom(1024)
+        client_thread = threading.Thread(
+            target=handle_client, args=(sock, data, address))
+        client_thread.start()
+
+
+if __name__ == "__main__":
+    start_server()
