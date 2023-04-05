@@ -1,18 +1,34 @@
 import socket
 import threading
 
+import pyautogui
+
+
+def hold_Key(key, hold_time):
+    import time
+    import pyautogui
+    start = time.time()
+    while time.time() - start < hold_time:
+        pyautogui.press(key)
+
 
 def handle_client(sock, data, address):
     switcher = {
-        "A": "function_A",
-        "B": "function_B"
+        "U": "W",
+        "D": "S",
+        "R": "D",
+        "L": "A",
     }
 
     mensage = data.decode()
     print(f"Received '{mensage}' from {address}")
 
-    if (mensage in switcher.keys()):
-        print(f"Execute the function '{switcher[mensage]}'")
+    comands = mensage.split(",")
+
+    for cm in comands:
+        if (cm in switcher.keys()):
+            print(f"Execute the function '{switcher[cm]}'")
+            hold_Key(switcher[cm], 50)
 
 
 def start_server():
